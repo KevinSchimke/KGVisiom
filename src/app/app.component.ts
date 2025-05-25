@@ -1,12 +1,44 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { MyTableComponent } from './my-table/my-table.component';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { MatButtonModule } from '@angular/material/button';
+import { CommonModule } from '@angular/common';
+import { RouterOutlet, RouterModule } from '@angular/router';
+
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [
+    RouterOutlet,
+    RouterModule,
+    MyTableComponent,
+    MatSidenavModule,
+    MatIconModule,
+    MatListModule,
+    MatButtonModule,
+    CommonModule
+  ],
+
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrls: ['./app.component.scss']
 })
+
 export class AppComponent {
   title = 'KGVisiom';
+  sidebarOpened = true;
+  isVersorgungOpen = false;
+
+
+  toggleSidebar() {
+    this.sidebarOpened = !this.sidebarOpened;
+
+  }
+
+  toggleVersorgung() {
+    this.isVersorgungOpen = !this.isVersorgungOpen;
+  }
 }
+
