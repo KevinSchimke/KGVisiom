@@ -6,7 +6,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterModule } from '@angular/router';
-
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -27,18 +27,21 @@ import { RouterOutlet, RouterModule } from '@angular/router';
 })
 
 export class AppComponent {
-  title = 'KGVisiom';
   sidebarOpened = true;
   isVersorgungOpen = false;
 
+  constructor(public router: Router) {}
 
   toggleSidebar() {
     this.sidebarOpened = !this.sidebarOpened;
-
   }
 
   toggleVersorgung() {
     this.isVersorgungOpen = !this.isVersorgungOpen;
+  }
+
+  isVersorgungActive(): boolean {
+    return this.router.url.startsWith('/versorgung');
   }
 }
 

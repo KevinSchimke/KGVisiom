@@ -1,10 +1,9 @@
 <mat-drawer-container class="app-container" autosize>
 
   <!-- SIDEBAR -->
-  <mat-drawer mode="side" opened class="app-sidenav" [ngClass]="{ 'mini': !sidebarOpened }"
-    style="border-radius: unset !important; border-right: 1px solid #545454;">
+  <mat-drawer mode="side" opened class="app-sidenav" [ngClass]="{ 'mini': !sidebarOpened }" style="border-radius: unset !important; border-right: 1px solid #545454;">
     <!-- Logo & Burger im Sidebar -->
-    <div [ngClass]="{ 'sidebar-logo-close': !sidebarOpened, 'sidebar-logo-open': sidebarOpened }">
+     <div [ngClass]="{ 'sidebar-logo-close': !sidebarOpened, 'sidebar-logo-open': sidebarOpened }">
       <ng-container *ngIf="sidebarOpened; else miniSidebar">
         <img src="assets/Logo/Logo_lang_nbg.png" alt="Sidebar-Logo" class="logo" />
         <button mat-icon-button (click)="toggleSidebar()" aria-label="Toggle Sidebar">
@@ -44,43 +43,53 @@
           <span class="nav-label" *ngIf="sidebarOpened">Finanzen</span>
         </div>
       </mat-list-item>
-      <mat-list-item (click)="isVersorgungOpen = !isVersorgungOpen">
-        <div [ngClass]="{ 'centered-item': !sidebarOpened, 'aligned-item': sidebarOpened }">
-          <mat-icon>water_drop</mat-icon>
-          <span class="nav-label" *ngIf="sidebarOpened">Versorgung</span>
-          <span *ngIf="sidebarOpened" class="expand-icon">
-            <mat-icon>{{ isVersorgungOpen ? 'expand_less' : 'expand_more' }}</mat-icon>
-          </span>
-        </div>
-      </mat-list-item>
 
-      <!-- Untermenü -->
-      <!-- Untermenü -->
-      <div *ngIf="isVersorgungOpen" class="submenu">
-        <mat-list-item [routerLink]="'/versorgung/wasser'"
-          [ngClass]="{ 'active': isSubItemActive('/versorgung/wasser') }" class="sub-item">
-          <div [ngClass]="{ 'centered-item': !sidebarOpened, 'aligned-item': sidebarOpened }">
-            <mat-icon>water</mat-icon>
-            <span class="nav-label" *ngIf="sidebarOpened">Wasserversorgung</span>
-          </div>
-        </mat-list-item>
 
-        <mat-list-item [routerLink]="'/versorgung/strom'" [ngClass]="{ 'active': isSubItemActive('/versorgung/strom') }"
-          class="sub-item">
-          <div [ngClass]="{ 'centered-item': !sidebarOpened, 'aligned-item': sidebarOpened }">
-            <mat-icon>bolt</mat-icon>
-            <span class="nav-label" *ngIf="sidebarOpened">Stromversorgung</span>
-          </div>
-        </mat-list-item>
+<!-- Untermenü -->
+<mat-list-item (click)="toggleVersorgung()" [ngClass]="{ 'active': isVersorgungActive() }">
+  <div [ngClass]="{ 'centered-item': !sidebarOpened, 'aligned-item': sidebarOpened }">
+    <mat-icon>water_drop</mat-icon>
+    <span class="nav-label" *ngIf="sidebarOpened">Versorgung</span>
+    <span *ngIf="sidebarOpened" class="expand-icon">
+      <mat-icon>{{ isVersorgungOpen ? 'expand_less' : 'expand_more' }}</mat-icon>
+    </span>
+  </div>
+</mat-list-item>
 
-        <mat-list-item [routerLink]="'/versorgung/entsorgung'"
-          [ngClass]="{ 'active': isSubItemActive('/versorgung/entsorgung') }" class="sub-item">
-          <div [ngClass]="{ 'centered-item': !sidebarOpened, 'aligned-item': sidebarOpened }">
-            <mat-icon>delete</mat-icon>
-            <span class="nav-label" *ngIf="sidebarOpened">Entsorgung</span>
-          </div>
-        </mat-list-item>
-      </div>
+<div *ngIf="isVersorgungOpen" class="submenu">
+  <mat-list-item 
+    [routerLink]="'/versorgung/wasser'" 
+    routerLinkActive="active" 
+    [routerLinkActiveOptions]="{ exact: true }"
+    class="sub-item">
+    <div [ngClass]="{ 'centered-item': !sidebarOpened, 'aligned-item': sidebarOpened }">
+      <mat-icon>water</mat-icon>
+      <span class="nav-label" *ngIf="sidebarOpened">Wasserversorgung</span>
+    </div>
+  </mat-list-item>
+
+  <mat-list-item 
+    [routerLink]="'/versorgung/strom'" 
+    routerLinkActive="active" 
+    [routerLinkActiveOptions]="{ exact: true }"
+    class="sub-item">
+    <div [ngClass]="{ 'centered-item': !sidebarOpened, 'aligned-item': sidebarOpened }">
+      <mat-icon>bolt</mat-icon>
+      <span class="nav-label" *ngIf="sidebarOpened">Stromversorgung</span>
+    </div>
+  </mat-list-item>
+
+  <mat-list-item 
+    [routerLink]="'/versorgung/entsorgung'" 
+    routerLinkActive="active" 
+    [routerLinkActiveOptions]="{ exact: true }"
+    class="sub-item">
+    <div [ngClass]="{ 'centered-item': !sidebarOpened, 'aligned-item': sidebarOpened }">
+      <mat-icon>delete</mat-icon>
+      <span class="nav-label" *ngIf="sidebarOpened">Entsorgung</span>
+    </div>
+  </mat-list-item>
+</div>
 
 
       <mat-list-item [routerLink]="'/aufgaben'" routerLinkActive="active">
@@ -117,9 +126,9 @@
       </div>
     </header>
 
-    <div class="scrollable-content">
-      <router-outlet></router-outlet>
-    </div>
+<div class="scrollable-content">
+  <router-outlet></router-outlet>
+</div>
 
   </mat-drawer-content>
 </mat-drawer-container>

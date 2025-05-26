@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { MaintenanceComponent } from './maintenance.component';
+import { WaterChangeComponent } from './water-change.component';
 
-describe('MaintenanceComponent', () => {
-  let component: MaintenanceComponent;
-  let fixture: ComponentFixture<MaintenanceComponent>;
+describe('WaterChangeComponent', () => {
+  let component: WaterChangeComponent;
+  let fixture: ComponentFixture<WaterChangeComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MaintenanceComponent]
+      imports: [WaterChangeComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(MaintenanceComponent);
+    fixture = TestBed.createComponent(WaterChangeComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
