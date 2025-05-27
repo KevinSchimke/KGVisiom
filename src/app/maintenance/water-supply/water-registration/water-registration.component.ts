@@ -3,7 +3,8 @@ import {
   FormBuilder,
   FormControl,
   FormGroup,
-  ReactiveFormsModule
+  ReactiveFormsModule,
+  Validators
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {
@@ -15,9 +16,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDatepicker, MatDatepickerModule } from '@angular/material/datepicker';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatCardModule } from '@angular/material/card';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatIconModule } from '@angular/material/icon';
+import { ViewEncapsulation } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
+
 
 export class YearOnlyDateAdapter extends NativeDateAdapter {
   override format(date: Date, displayFormat: Object): string {
@@ -39,6 +44,8 @@ export const YEAR_ONLY_FORMATS = {
   selector: 'app-water-registration',
   standalone: true,
   templateUrl: './water-registration.component.html',
+  styleUrls: ['./water-registration.component.scss'],
+  encapsulation: ViewEncapsulation.Emulated,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -48,6 +55,7 @@ export const YEAR_ONLY_FORMATS = {
     MatButtonModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatIconModule,
     MatCardModule
   ],
   providers: [
@@ -59,9 +67,9 @@ export class WaterRegistrationComponent {
   registerForm: FormGroup;
   sizeOptions = ['Unbekannt', '1/2 Zoll', '3/4 Zoll', '1 Zoll', '1 1/4 Zoll'];
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private snackBar: MatSnackBar) {
     this.registerForm = this.fb.group({
-      parcelNumber: [0],
+      parcelNumber: [0, [Validators.min(0)]],
       meterNumber: [''],
       calibrationYear: [null],
       size: ['Unbekannt']
@@ -77,19 +85,16 @@ export class WaterRegistrationComponent {
   }
 
   incrementParcel() {
-    const ctrl = this.parcelNumberControl;
-    ctrl.setValue((ctrl.value || 0) + 1);
+    const current = this.parcelNumberControl.value || 0;
+    this.parcelNumberControl.setValue(current + 1);
   }
 
   decrementParcel() {
-    const ctrl = this.parcelNumberControl;
-    const current = ctrl.value || 0;
-    if (current > 0) {
-      ctrl.setValue(current - 1);
-    }
+    const current = this.parcelNumberControl.value || 0;
+    this.parcelNumberControl.setValue(Math.max(0, current - 1));
   }
 
-  setYear(date: Date, picker: MatDatepicker<Date>) {
+  setYear(date: Date, picker: any) {
     const year = date.getFullYear();
     this.calibrationYearControl.setValue(new Date(year, 0, 1));
     picker.close();
@@ -98,7 +103,16 @@ export class WaterRegistrationComponent {
   register() {
     if (this.registerForm.valid) {
       console.log(this.registerForm.value);
+      this.snackBar.open('Wasseruhr erfolgreich registriert!', 'OK', {
+        duration: 3000, // in ms
+        horizontalPosition: 'right',
+        verticalPosition: 'top',
+        panelClass: ['success-snackbar'] // Optional: für Styling
+      });
+
       // Backend-Aufruf hier integrieren
+    } else {
+      this.registerForm.markAllAsTouched();
     }
   }
 }
