@@ -1,1 +1,53 @@
-<p>water-dashboard works!</p>
+<div class="dashboard-container">
+  <div class="charts-row">
+    <div class="chart-wrapper">
+      <h2>Verbrauch je Parzelle</h2>
+      <canvas baseChart
+              [data]="barChartData"
+              [type]="barChartType"
+              [options]="barChartOptions">
+      </canvas>
+    </div>
+
+    <div class="chart-wrapper">
+      <h2>Verbrauchsverteilung</h2>
+      <canvas baseChart
+              [data]="doughnutChartData"
+              [type]="doughnutChartType"
+              [options]="doughnutChartOptions">
+      </canvas>
+    </div>
+  </div>
+
+  <h2>Wasseruhren-Übersicht</h2>
+  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+
+    <ng-container matColumnDef="parzelle">
+      <th mat-header-cell *matHeaderCellDef>Parzelle</th>
+      <td mat-cell *matCellDef="let element">{{element.parzelle}}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="zaehlernummer">
+      <th mat-header-cell *matHeaderCellDef>Zählernummer</th>
+      <td mat-cell *matCellDef="let element">{{element.zaehlernummer}}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="verbrauch">
+      <th mat-header-cell *matHeaderCellDef>Verbrauch (L)</th>
+      <td mat-cell *matCellDef="let element">{{element.verbrauch}}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="eichjahr">
+      <th mat-header-cell *matHeaderCellDef>Eichjahr</th>
+      <td mat-cell *matCellDef="let element">{{element.eichjahr}}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+  <mat-paginator 
+  [pageSizeOptions]="[5, 10, 25]" 
+  showFirstLastButtons 
+  [pageSize]="5">
+</mat-paginator>
+</div>

@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { MyTableComponent } from './my-table/my-table.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
@@ -16,7 +15,6 @@ import { Router } from '@angular/router';
   imports: [
     RouterOutlet,
     RouterModule,
-    MyTableComponent,
     MatSidenavModule,
     MatIconModule,
     MatListModule,
