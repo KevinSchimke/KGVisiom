@@ -1,1 +1,56 @@
-<p>water-meter-reading works!</p>
+<mat-card>
+  <mat-card-title>Ablesung erfassen</mat-card-title>
+  <mat-card-content>
+    <form [formGroup]="readingForm" class="water-form">
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="parcel-field">
+          <mat-label>Parzellennummer</mat-label>
+          <input matInput type="number" formControlName="parcelNumber" (keydown.enter)="$event.preventDefault()" />
+          <button mat-icon-button matSuffix (click)="decrementParcel()" tabindex="-1">
+            <mat-icon>remove</mat-icon>
+          </button>
+          <button mat-icon-button matSuffix (click)="incrementParcel()" tabindex="-1">
+            <mat-icon>add</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Zählernummer</mat-label>
+          <input disabled matInput [value]="meterNumberDisplay" readonly />
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Zählerstand (m³)*</mat-label>
+          <input matInput formControlName="readingValue" type="number" step="0.01" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Ablesedatum*</mat-label>
+          <input matInput [matDatepicker]="datePicker" formControlName="readingDate" />
+          <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
+          <mat-datepicker #datePicker></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" style="flex: 1;">
+          <mat-label>Ableseart*</mat-label>
+          <mat-select formControlName="readingType">
+            <mat-option [value]="null">Bitte Ableseart auswählen</mat-option>
+            <mat-option value="zwischenablesung">Zwischenablesung</mat-option>
+            <mat-option value="jahresendablesung">Jahresendablesung</mat-option>
+            <mat-option value="paechterwechsel">Pächterwechsel</mat-option>
+          </mat-select>
+          <mat-error *ngIf="readingForm.get('readingType')?.invalid && readingForm.get('readingType')?.touched">
+            Bitte Ableseart auswählen
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </form>
+  </mat-card-content>
+  <mat-card-actions align="end">
+    <button mat-raised-button color="primary" (click)="saveReading()">Ablesung speichern</button>
+  </mat-card-actions>
+</mat-card>
