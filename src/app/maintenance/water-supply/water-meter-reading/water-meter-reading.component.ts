@@ -19,6 +19,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { NativeDateAdapter } from '@angular/material/core';
+import { debounceTime } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+
 
 export class GermanDateAdapter extends NativeDateAdapter {
   override format(date: Date, displayFormat: Object): string {
@@ -72,18 +75,34 @@ export class WaterMeterReadingComponent {
   readingForm: FormGroup;
   meterNumberDisplay: string = 'Keinen Zähler gefunden';
 
-  constructor(private fb: FormBuilder, private snackBar: MatSnackBar) {
-    this.readingForm = this.fb.group({
-      parcelNumber: [0, [Validators.min(0)]],
-      readingValue: [null, [Validators.required, Validators.min(0)]],
-      readingDate: [new Date(), Validators.required],
-      readingType: [null, Validators.required]
-    });
+constructor(private fb: FormBuilder, private snackBar: MatSnackBar, private http: HttpClient) {
+  this.readingForm = this.fb.group({
+    parcelNumber: [0, [Validators.min(0)]],
+    readingValue: [null, [Validators.required, Validators.min(0)]],
+    readingDate: [new Date(), Validators.required],
+    readingType: [null, Validators.required]
+  });
 
-    this.readingForm.get('parcelNumber')?.valueChanges.subscribe(value => {
-      this.meterNumberDisplay = value === 123 ? 'WM-456789' : 'Keinen Zähler gefunden';
+  // 🔁 Parzellennummer-Änderung → aktive Wasseruhr abfragen
+  this.readingForm.get('parcelNumber')?.valueChanges
+    .pipe(debounceTime(300))
+    .subscribe(parcelNumber => {
+      if (parcelNumber > 0) {
+        this.http.get<{ watermeterID: string | null }>(`https://backend.kgv.local:8443/api/water/active-meter?parcelNumber=${parcelNumber}`)
+          .subscribe({
+            next: (result) => {
+              this.meterNumberDisplay = result.watermeterID || 'Kein Zähler';
+            },
+            error: () => {
+              this.meterNumberDisplay = 'Fehler bei Abfrage';
+            }
+          });
+      } else {
+        this.meterNumberDisplay = 'Kein Zähler';
+      }
     });
-  }
+}
+
 
   get parcelNumberControl(): FormControl {
     return this.readingForm.get('parcelNumber') as FormControl;
@@ -99,16 +118,45 @@ export class WaterMeterReadingComponent {
     this.parcelNumberControl.setValue(Math.max(0, current - 1));
   }
 
-  saveReading() {
-    if (this.readingForm.valid) {
-      console.log(this.readingForm.value);
-      this.snackBar.open('Ablesung gespeichert!', 'OK', {
-        duration: 3000,
-        horizontalPosition: 'right',
-        verticalPosition: 'top'
+saveReading() {
+  if (this.readingForm.valid) {
+    const formValue = this.readingForm.value;
+
+    const payload = {
+      parcelNumber: formValue.parcelNumber,
+      readingValue: formValue.readingValue,
+      readingDate: formValue.readingDate,
+      readingType: formValue.readingType
+    };
+
+    this.http.post('https://backend.kgv.local:8443/api/water/readings', payload)
+      .subscribe({
+        next: () => {
+          this.snackBar.open('Ablesung gespeichert!', 'OK', {
+            duration: 3000,
+            horizontalPosition: 'right',
+            verticalPosition: 'top'
+          });
+
+          this.readingForm.reset({
+            parcelNumber: 0,
+            readingDate: new Date(),
+            readingType: null
+          });
+          this.meterNumberDisplay = 'Kein Zähler';
+        },
+        error: (err) => {
+          console.error(err);
+          this.snackBar.open('Fehler beim Speichern der Ablesung', 'OK', {
+            duration: 3000,
+            horizontalPosition: 'right',
+            verticalPosition: 'top'
+          });
+        }
       });
-    } else {
-      this.readingForm.markAllAsTouched();
-    }
+  } else {
+    this.readingForm.markAllAsTouched();
   }
+}
+
 }

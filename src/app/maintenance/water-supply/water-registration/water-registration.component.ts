@@ -22,6 +22,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ViewEncapsulation } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { HttpClient } from '@angular/common/http';
 
 
 export class YearOnlyDateAdapter extends NativeDateAdapter {
@@ -67,7 +68,7 @@ export class WaterRegistrationComponent {
   registerForm: FormGroup;
   sizeOptions = ['Unbekannt', '1/2 Zoll', '3/4 Zoll', '1 Zoll', '1 1/4 Zoll'];
 
-  constructor(private fb: FormBuilder, private snackBar: MatSnackBar) {
+  constructor(private fb: FormBuilder, private snackBar: MatSnackBar,   private http: HttpClient) {
     this.registerForm = this.fb.group({
       parcelNumber: [0, [Validators.min(0)]],
       meterNumber: [''],
@@ -100,19 +101,40 @@ export class WaterRegistrationComponent {
     picker.close();
   }
 
-  register() {
-    if (this.registerForm.valid) {
-      console.log(this.registerForm.value);
-      this.snackBar.open('Wasseruhr erfolgreich registriert!', 'OK', {
-        duration: 3000, // in ms
-        horizontalPosition: 'right',
-        verticalPosition: 'top',
-        panelClass: ['success-snackbar'] // Optional: für Styling
-      });
+register() {
+  if (this.registerForm.valid) {
+    const formValue = this.registerForm.value;
 
-      // Backend-Aufruf hier integrieren
-    } else {
-      this.registerForm.markAllAsTouched();
-    }
+    const payload = {
+      meterNumber: formValue.meterNumber,
+      parcelNumber: formValue.parcelNumber || null,
+      calibrationYear: formValue.calibrationYear,
+      size: formValue.size
+    };
+
+    this.http.post('https://backend.kgv.local:8443/api/water/register', payload)
+      .subscribe({
+        next: () => {
+          this.snackBar.open('Wasseruhr erfolgreich registriert!', 'OK', {
+            duration: 3000,
+            horizontalPosition: 'right',
+            verticalPosition: 'top',
+            panelClass: ['success-snackbar']
+          });
+          this.registerForm.reset({ size: 'Unbekannt', parcelNumber: 0 });
+        },
+        error: (err) => {
+          console.error(err);
+          this.snackBar.open('Fehler bei der Registrierung', 'OK', {
+            duration: 3000,
+            horizontalPosition: 'right',
+            verticalPosition: 'top',
+            panelClass: ['error-snackbar']
+          });
+        }
+      });
+  } else {
+    this.registerForm.markAllAsTouched();
   }
+}
 }
