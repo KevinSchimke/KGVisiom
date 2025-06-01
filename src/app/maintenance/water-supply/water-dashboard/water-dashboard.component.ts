@@ -1,15 +1,18 @@
-import { Component, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, AfterViewInit, ViewEncapsulation, inject } from '@angular/core';
 import { NgChartsModule } from 'ng2-charts';
 import { ChartConfiguration, ChartType } from 'chart.js';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
+import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { CommonModule } from '@angular/common';
 import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSelectModule } from '@angular/material/select';
+import { HttpClient } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-water-dashboard',
@@ -21,44 +24,55 @@ import { MatPaginatorModule } from '@angular/material/paginator';
     MatFormFieldModule,
     MatInputModule,
     MatSortModule,
-    MatPaginatorModule
+    MatSelectModule,
+    MatPaginatorModule,
+    FormsModule
   ],
   templateUrl: './water-dashboard.component.html',
-  styleUrl: './water-dashboard.component.scss'
+  styleUrl: './water-dashboard.component.scss',
+  encapsulation: ViewEncapsulation.None
 })
 export class WaterDashboardComponent implements AfterViewInit {
-  displayedColumns: string[] = ['parzelle', 'zaehlernummer', 'verbrauch', 'eichjahr'];
+  private http = inject(HttpClient);
+
+
+
   dataSource = new MatTableDataSource<any>();
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-rawData = [
-  { parzelle: 1, zaehlernummer: 'WU-1001', verbrauch: 1200, eichjahr: 2021 },
-  { parzelle: 2, zaehlernummer: 'WU-1002', verbrauch: 950, eichjahr: 2022 },
-  { parzelle: 3, zaehlernummer: 'WU-1003', verbrauch: 1340, eichjahr: 2020 },
-  { parzelle: 4, zaehlernummer: 'WU-1004', verbrauch: 800, eichjahr: 2027 },
-  { parzelle: 5, zaehlernummer: 'WU-1005', verbrauch: 2800, eichjahr: 2027 },
-  { parzelle: 6, zaehlernummer: 'WU-1006', verbrauch: 600, eichjahr: 2023 },
-  { parzelle: 7, zaehlernummer: 'WU-1007', verbrauch: 900, eichjahr: 2021 },
-  { parzelle: 8, zaehlernummer: 'WU-1008', verbrauch: 1100, eichjahr: 2022 },
-  { parzelle: 9, zaehlernummer: 'WU-1009', verbrauch: 750, eichjahr: 2019 },
-  { parzelle: 10, zaehlernummer: 'WU-1010', verbrauch: 980, eichjahr: 2020 },
-  { parzelle: 11, zaehlernummer: 'WU-1011', verbrauch: 1150, eichjahr: 2024 },
-  { parzelle: 12, zaehlernummer: 'WU-1012', verbrauch: 670, eichjahr: 2025 },
-  { parzelle: 13, zaehlernummer: 'WU-1013', verbrauch: 1300, eichjahr: 2026 },
-  { parzelle: 9999, zaehlernummer: 'WU-VEREIN', verbrauch: 500, eichjahr: 2023 }
-];
+  filterableColumns = [
+    { value: 'parzelle', viewValue: 'Parzelle' },
+    { value: 'zaehlernummer', viewValue: 'Zählernummer' },
+    { value: 'startwert', viewValue: 'Startwert' },
+    { value: 'endwert', viewValue: 'Endwert' },
+    { value: 'verbrauch', viewValue: 'Verbrauch' },
+    { value: 'eichjahr', viewValue: 'Eichjahr' }
+  ];
 
+  get displayedColumns(): string[] {
+  return this.filterableColumns.map(c => c.value);
+}
 
+  selectedColumn = 'parzelle';
+  filterValue = '';
   gesamtverbrauch = 20000;
 
-  // Chart properties
   public barChartType: ChartType = 'bar';
   public barChartData: ChartConfiguration['data'] = { labels: [], datasets: [] };
   public barChartOptions: ChartConfiguration['options'] = {
     responsive: true,
     plugins: { legend: { position: 'top' } },
-    scales: { y: { beginAtZero: true } }
+    scales: {
+      y: { beginAtZero: true },
+      x: {
+        ticks: {
+          maxRotation: 0,
+          minRotation: 0,
+          autoSkip: true
+        }
+      }
+    }
   };
 
   public doughnutChartType: ChartType = 'doughnut';
@@ -72,41 +86,122 @@ rawData = [
     }
   };
 
+  public top5ChartData: ChartConfiguration['data'] = { labels: [], datasets: [] };
+
+  selectedYear: number | null = null;
+  availableYears: number[] = [];
+
+  constructor() {
+    this.loadAvailableYears();
+  }
+
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+
+    this.setCustomFilterPredicate();
   }
 
-  constructor() {
-    this.initializeDashboard();
+  applyFilter() {
+    const filterValue = this.filterValue?.trim().toLowerCase() || '';
+    this.dataSource.filter = filterValue;
+
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
-  initializeDashboard() {
-    const parzellen = this.rawData.filter(d => d.parzelle !== 9999);
-    const vereinsheim = this.rawData.find(d => d.parzelle === 9999)?.verbrauch || 0;
-    const parzellenVerbrauch = parzellen.reduce((sum, d) => sum + d.verbrauch, 0);
-    const verlust = Math.max(this.gesamtverbrauch - (parzellenVerbrauch + vereinsheim), 0);
+  setCustomFilterPredicate() {
+    this.dataSource.filterPredicate = (data: any, filter: string) => {
+      const selectedField = this.selectedColumn;
+      const value = data[selectedField];
 
-    // Tabelle
-    this.dataSource.data = this.rawData;
+      if (value == null) return false;
 
-    // Balkendiagramm
-    this.barChartData = {
-      labels: parzellen.map(d => `Parzelle ${d.parzelle}`),
-      datasets: [{
-        data: parzellen.map(d => d.verbrauch),
-        label: 'Verbrauch (Liter)',
-        backgroundColor: '#1976d2'
-      }]
+      const filterNormalized = filter.replace(',', '.').trim().toLowerCase();
+
+      if (typeof value === 'number') {
+        const valueStr = value.toFixed(2);
+        return valueStr.includes(filterNormalized);
+      }
+
+      return value.toString().toLowerCase().includes(filterNormalized);
     };
+  }
 
-    // Kreisdiagramm
-    this.doughnutChartData = {
-      labels: ['Parzellen', 'Verlust', 'Vereinsheim'],
-      datasets: [{
-        data: [parzellenVerbrauch, verlust, vereinsheim],
-        backgroundColor: ['#42a5f5', '#ef5350', '#66bb6a']
-      }]
-    };
+  loadAvailableYears() {
+    this.http.get<number[]>('https://backend.kgv.local:8443/api/water/years')
+      .subscribe({
+        next: (years) => {
+          this.availableYears = years.sort((a, b) => b - a);
+          this.selectedYear = this.availableYears[0];
+          this.loadDataByYear();
+        },
+        error: (err) => {
+          console.error('Fehler beim Laden der Jahre:', err);
+        }
+      });
+  }
+
+  updatePageSize(newSize: number) {
+  if (this.paginator) {
+    this.paginator._changePageSize(newSize);
+  }
+}
+
+
+  loadDataByYear() {
+    if (!this.selectedYear) return;
+
+    this.http.get<any[]>(`https://backend.kgv.local:8443/api/water/readings?year=${this.selectedYear}`)
+      .subscribe({
+        next: (data) => {
+          data.sort((a, b) => a.parzelle - b.parzelle);
+
+          // WICHTIG: Neue Instanz mit aktualisiertem paginator und sort
+          this.dataSource = new MatTableDataSource<any>(data);
+          this.dataSource.paginator = this.paginator;
+          this.dataSource.sort = this.sort;
+          this.setCustomFilterPredicate();
+
+          const parzellen = data.filter(d => d.parzelle !== 9999);
+          const vereinsheim = data.find(d => d.parzelle === 9999)?.verbrauch || 0;
+          const parzellenVerbrauch = parzellen.reduce((sum, d) => sum + d.verbrauch, 0);
+          const verlust = Math.max(this.gesamtverbrauch - (parzellenVerbrauch + vereinsheim), 0);
+
+          this.barChartData = {
+            labels: parzellen.map(d => `Parzelle ${d.parzelle}`),
+            datasets: [{
+              data: parzellen.map(d => d.verbrauch),
+              label: 'Verbrauch (m³)',
+              backgroundColor: '#1976d2'
+            }]
+          };
+
+          this.doughnutChartData = {
+            labels: ['Parzellen', 'Verlust', 'Vereinsheim'],
+            datasets: [{
+              data: [parzellenVerbrauch, verlust, vereinsheim],
+              backgroundColor: ['#42a5f5', '#ef5350', '#66bb6a']
+            }]
+          };
+
+          const top5 = [...parzellen]
+            .sort((a, b) => b.verbrauch - a.verbrauch)
+            .slice(0, 5);
+
+          this.top5ChartData = {
+            labels: top5.map(d => `Parzelle ${d.parzelle}`),
+            datasets: [{
+              data: top5.map(d => d.verbrauch),
+              label: 'Top-Verbrauch (m³)',
+              backgroundColor: '#ffa726'
+            }]
+          };
+        },
+        error: (err) => {
+          console.error('Fehler beim Laden der Daten für Jahr:', err);
+        }
+      });
   }
 }

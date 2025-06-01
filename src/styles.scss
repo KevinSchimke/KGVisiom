@@ -24,3 +24,29 @@ input[type='number'] {
   font-weight: bold;
   border-radius: 4px;
 }
+
+/* Globale Tabelle in dunklem Layout */
+.table-wrapper .mat-mdc-table {
+  background-color: #1e1e1e !important;
+  color: #fff !important;
+}
+
+.table-wrapper .mat-mdc-header-cell,
+.table-wrapper .mat-mdc-cell {
+  background-color: #1e1e1e !important;
+  color: #fff !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.table-wrapper .mat-mdc-row:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.table-wrapper .mat-mdc-paginator {
+  background-color: #1e1e1e !important;
+  color: #fff !important;
+}
+
+  .mat-mdc-paginator-page-size {
+    display: none !important;
+  }

@@ -10,6 +10,8 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list'
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatPaginatorIntl } from '@angular/material/paginator';
+import { getGermanPaginatorIntl } from './shared/paginator/paginator-intl-de'; // ohne /app
 
 export const appConfig = {
   providers: [
@@ -23,7 +25,11 @@ export const appConfig = {
       MatIconModule,
       MatListModule,
       MatTabsModule,
-    )
+    ),
+    {
+      provide: MatPaginatorIntl,
+      useValue: getGermanPaginatorIntl()
+    }
   ]
 };
 

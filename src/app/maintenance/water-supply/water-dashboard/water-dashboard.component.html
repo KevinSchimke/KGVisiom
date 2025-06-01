@@ -1,53 +1,100 @@
 <div class="dashboard-container">
+  <h2 class="dashboard-title">Wasserverbrauch Übersicht</h2>
+
+  <!-- Diagramme -->
   <div class="charts-row">
-    <div class="chart-wrapper">
-      <h2>Verbrauch je Parzelle</h2>
-      <canvas baseChart
-              [data]="barChartData"
-              [type]="barChartType"
-              [options]="barChartOptions">
-      </canvas>
+    <div class="chart-wrapper chart-bar">
+      <h2>Verbrauch je Parzelle ({{ selectedYear }})</h2>
+      <canvas baseChart [data]="barChartData" [type]="barChartType" [options]="barChartOptions"></canvas>
     </div>
 
-    <div class="chart-wrapper">
-      <h2>Verbrauchsverteilung</h2>
-      <canvas baseChart
-              [data]="doughnutChartData"
-              [type]="doughnutChartType"
-              [options]="doughnutChartOptions">
-      </canvas>
+    <div class="chart-wrapper chart-doughnut">
+      <h2>Verbrauchsverteilung ({{ selectedYear }})</h2>
+      <canvas baseChart [data]="doughnutChartData" [type]="doughnutChartType" [options]="doughnutChartOptions"></canvas>
+    </div>
+
+    <div class="chart-wrapper chart-top5">
+      <h2>Top 5 Wasserverbraucher ({{ selectedYear }})</h2>
+      <canvas baseChart [data]="top5ChartData" [type]="barChartType" [options]="barChartOptions"></canvas>
     </div>
   </div>
 
-  <h2>Wasseruhren-Übersicht</h2>
-  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+  <!-- Gemeinsame Box für Filter + Tabelle -->
+  <div class="table-wrapper">
 
-    <ng-container matColumnDef="parzelle">
-      <th mat-header-cell *matHeaderCellDef>Parzelle</th>
-      <td mat-cell *matCellDef="let element">{{element.parzelle}}</td>
-    </ng-container>
+    <!-- Filterzeile + Paginator oben -->
+    <div class="filter-controls-row">
+      <div class="filter-fields">
+        <mat-form-field appearance="outline">
+          <mat-label>Jahr auswählen</mat-label>
+          <mat-select [(value)]="selectedYear" (selectionChange)="loadDataByYear()">
+            <mat-option *ngFor="let year of availableYears" [value]="year">{{ year }}</mat-option>
+          </mat-select>
+        </mat-form-field>
 
-    <ng-container matColumnDef="zaehlernummer">
-      <th mat-header-cell *matHeaderCellDef>Zählernummer</th>
-      <td mat-cell *matCellDef="let element">{{element.zaehlernummer}}</td>
-    </ng-container>
+        <mat-form-field appearance="outline">
+          <mat-label>Filterspalte</mat-label>
+          <mat-select [(ngModel)]="selectedColumn" (selectionChange)="applyFilter()">
+            <mat-option *ngFor="let col of filterableColumns" [value]="col.value">{{ col.viewValue }}</mat-option>
+          </mat-select>
+        </mat-form-field>
 
-    <ng-container matColumnDef="verbrauch">
-      <th mat-header-cell *matHeaderCellDef>Verbrauch (L)</th>
-      <td mat-cell *matCellDef="let element">{{element.verbrauch}}</td>
-    </ng-container>
+        <mat-form-field appearance="outline" floatLabel="always">
+          <mat-label>Filterwert</mat-label>
+          <input matInput placeholder="Filterwert" [(ngModel)]="filterValue" (ngModelChange)="applyFilter()" />
+        </mat-form-field>
 
-    <ng-container matColumnDef="eichjahr">
-      <th mat-header-cell *matHeaderCellDef>Eichjahr</th>
-      <td mat-cell *matCellDef="let element">{{element.eichjahr}}</td>
-    </ng-container>
+      </div>
+      <div style="display: flex; align-items: center;">
+        <mat-form-field appearance="outline" class="paginator-formfield">
+          <mat-label>Einträge pro Seite</mat-label>
+<mat-select
+  [value]="paginator.pageSize"
+  (selectionChange)="updatePageSize($event.value)">
+  <mat-option *ngFor="let size of [5, 10, 25, 50, 100, 500]" [value]="size">{{ size }}</mat-option>
+</mat-select>
+        </mat-form-field>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-  </table>
-  <mat-paginator 
-  [pageSizeOptions]="[5, 10, 25]" 
-  showFirstLastButtons 
-  [pageSize]="5">
-</mat-paginator>
+        <mat-paginator #paginator [length]="dataSource.filteredData.length || 0" [pageSize]="10" [pageSizeOptions]="[]"
+          showFirstLastButtons class="custom-paginator">
+        </mat-paginator>
+      </div>
+    </div>
+
+    <!-- Tabelle -->
+    <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 mat-custom-table">
+      <ng-container matColumnDef="parzelle">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Parzelle</th>
+        <td mat-cell *matCellDef="let element">{{ element.parzelle }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="zaehlernummer">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Zählernummer</th>
+        <td mat-cell *matCellDef="let element">{{ element.zaehlernummer }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="verbrauch">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Verbrauch (L)</th>
+        <td mat-cell *matCellDef="let element">{{ element.verbrauch | number: '1.2-2' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="startwert">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Startwert</th>
+        <td mat-cell *matCellDef="let element">{{ element.startwert | number: '1.2-2' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="endwert">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Endwert</th>
+        <td mat-cell *matCellDef="let element">{{ element.endwert | number: '1.2-2' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="eichjahr">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Eichjahr</th>
+        <td mat-cell *matCellDef="let element">{{ element.eichjahr }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
 </div>
