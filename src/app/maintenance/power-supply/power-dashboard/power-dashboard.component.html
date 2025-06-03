@@ -1,5 +1,5 @@
 <div class="dashboard-container">
-    <h2 class="dashboard-title">Wasserverbrauch Übersicht</h2>
+    <h2 class="dashboard-title">Stromverbrauch Übersicht</h2>
     <div class="charts-row">
         <div class="chart-wrapper chart-bar">
             <h2>Verbrauch je Parzelle ({{ selectedYear }})</h2>
@@ -11,7 +11,7 @@
                 [options]="doughnutChartOptions"></canvas>
         </div>
         <div class="chart-wrapper chart-top5">
-            <h2>Top 5 Wasserverbraucher ({{ selectedYear }})</h2>
+            <h2>Top 5 Stromverbraucher ({{ selectedYear }})</h2>
             <canvas baseChart [data]="top5ChartData" [type]="barChartType" [options]="barChartOptions"></canvas>
         </div>
     </div>
@@ -60,7 +60,7 @@
                 <td mat-cell *matCellDef="let element">{{ element.zaehlernummer }}</td>
             </ng-container>
             <ng-container matColumnDef="verbrauch">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Verbrauch (m³)</th>
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Verbrauch (kWh)</th>
                 <td mat-cell *matCellDef="let element">{{ element.verbrauch | number: '1.2-2' }}</td>
             </ng-container>
             <ng-container matColumnDef="startwert">

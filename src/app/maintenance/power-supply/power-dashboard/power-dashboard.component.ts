@@ -15,7 +15,7 @@ import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-water-dashboard',
+  selector: 'app-power-dashboard',
   standalone: true,
   imports: [
     NgChartsModule,
@@ -28,11 +28,11 @@ import { FormsModule } from '@angular/forms';
     MatPaginatorModule,
     FormsModule
   ],
-  templateUrl: './water-dashboard.component.html',
-  styleUrl: './water-dashboard.component.scss',
+  templateUrl: './power-dashboard.component.html',
+  styleUrl: './power-dashboard.component.scss',
   encapsulation: ViewEncapsulation.None
 })
-export class WaterDashboardComponent implements AfterViewInit {
+export class PowerDashboardComponent implements AfterViewInit {
   constructor() {
     this.loadAvailableYears();
   }
@@ -87,7 +87,7 @@ export class WaterDashboardComponent implements AfterViewInit {
   get displayedColumns(): string[] { return this.filterableColumns.map(c => c.value); }
 
   loadAvailableYears() {
-    this.http.get<number[]>('https://backend.kgv.local:8443/api/water/years')
+    this.http.get<number[]>('https://backend.kgv.local:8443/api/power/years')
       .subscribe({
         next: (years) => {
           this.availableYears = years.sort((a, b) => b - a);
@@ -103,7 +103,7 @@ export class WaterDashboardComponent implements AfterViewInit {
   loadDataByYear() {
     if (!this.selectedYear) return;
 
-    this.http.get<any[]>(`https://backend.kgv.local:8443/api/water/readings?year=${this.selectedYear}`)
+    this.http.get<any[]>(`https://backend.kgv.local:8443/api/power/readings?year=${this.selectedYear}`)
       .subscribe({
         next: (data) => {
           data.sort((a, b) => a.parzelle - b.parzelle);
@@ -122,7 +122,7 @@ export class WaterDashboardComponent implements AfterViewInit {
             labels: parzellen.map(d => `Parzelle ${d.parzelle}`),
             datasets: [{
               data: parzellen.map(d => d.verbrauch),
-              label: 'Verbrauch (m³)',
+              label: 'Verbrauch (kWh)',
               backgroundColor: '#1976d2'
             }]
           };
@@ -143,7 +143,7 @@ export class WaterDashboardComponent implements AfterViewInit {
             labels: top5.map(d => `Parzelle ${d.parzelle}`),
             datasets: [{
               data: top5.map(d => d.verbrauch),
-              label: 'Top-Verbrauch (m³)',
+              label: 'Top-Verbrauch (kWh)',
               backgroundColor: '#ffa726'
             }]
           };

@@ -1,7 +1,7 @@
 <mat-card>
   <mat-card-title>Ablesung erfassen</mat-card-title>
   <mat-card-content>
-    <form [formGroup]="readingForm" class="water-form">
+    <form [formGroup]="readingForm" class="power-form">
       <div class="form-row">
         <mat-form-field appearance="outline" class="parcel-field">
           <mat-label>Parzellennummer</mat-label>
@@ -22,7 +22,7 @@
 
       <div class="form-row">
         <mat-form-field appearance="outline">
-          <mat-label>Zählerstand (m³)</mat-label>
+          <mat-label>Zählerstand (kWh)</mat-label>
           <input matInput formControlName="readingValue" type="number" step="0.01" />
         </mat-form-field>
 

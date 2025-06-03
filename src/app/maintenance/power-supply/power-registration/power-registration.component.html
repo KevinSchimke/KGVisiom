@@ -1,0 +1,48 @@
+<mat-card>
+    <mat-card-title>Neuen Elektrozähler registrieren</mat-card-title>
+    <mat-card-content>
+        <form class="power-form" [formGroup]="registerForm">
+            <div class="form-row" style="display: flex; gap: 16px; align-items: center;">
+                <mat-form-field appearance="outline" floatLabel="always" class="parcel-field">
+                    <mat-label>Parzellennummer</mat-label>
+                    <input matInput type="number" formControlName="parcelNumber" class="parcel-input"
+                        (keydown.enter)="$event.preventDefault()" />
+                    <button mat-icon-button matSuffix (click)="decrementParcel()" tabindex="-1">
+                        <mat-icon>remove</mat-icon>
+                    </button>
+                    <button mat-icon-button matSuffix (click)="incrementParcel()" tabindex="-1">
+                        <mat-icon>add</mat-icon>
+                    </button>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" style="flex: 1;">
+                    <mat-label>Zählernummer</mat-label>
+                    <input matInput formControlName="meterNumber" />
+                </mat-form-field>
+            </div>
+
+            <div class="form-row" style="display: flex; gap: 16px;">
+                <mat-form-field appearance="outline" style="flex: 1;">
+                    <mat-label>Eichjahr</mat-label>
+                    <input matInput [matDatepicker]="picker" [formControl]="calibrationYearControl"
+                        (focus)="picker.open()" readonly />
+                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker startView="multi-year" (yearSelected)="setYear($event, picker)"
+                        panelClass="year-picker"></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" style="flex: 1;">
+                    <mat-label>Anschlussgröße</mat-label>
+                    <mat-select formControlName="size">
+                        <mat-option *ngFor="let option of sizeOptions" [value]="option">
+                            {{ option }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+        </form>
+    </mat-card-content>
+    <mat-card-actions align="end">
+        <button mat-raised-button color="primary" (click)="register()">Wasseruhr registrieren</button>
+    </mat-card-actions>
+</mat-card>
