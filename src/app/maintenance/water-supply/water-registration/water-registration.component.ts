@@ -68,7 +68,7 @@ export class WaterRegistrationComponent {
   registerForm: FormGroup;
   sizeOptions = ['Unbekannt', '1/2 Zoll', '3/4 Zoll', '1 Zoll', '1 1/4 Zoll'];
 
-  constructor(private fb: FormBuilder, private snackBar: MatSnackBar,   private http: HttpClient) {
+  constructor(private fb: FormBuilder, private snackBar: MatSnackBar, private http: HttpClient) {
     this.registerForm = this.fb.group({
       parcelNumber: [0, [Validators.min(0)]],
       meterNumber: [''],

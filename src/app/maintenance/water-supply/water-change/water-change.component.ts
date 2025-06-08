@@ -24,6 +24,7 @@ import {
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { HttpClient } from '@angular/common/http';
 
 export class GermanDateAdapter extends NativeDateAdapter {
   override format(date: Date, displayFormat: Object): string {
@@ -81,13 +82,37 @@ export class WaterChangeComponent {
     { id: 3, display: 'WM-2023-003' }
   ];
 
-  constructor(private fb: FormBuilder, private snackBar: MatSnackBar) {
+  constructor(private fb: FormBuilder, private snackBar: MatSnackBar, private http: HttpClient) {
     this.changeForm = this.fb.group({
       parcelNumber: [0, [Validators.min(0)]],
       changeDate: [new Date(), Validators.required],
       newMeterId: [null, Validators.required],
       newReading: [null, [Validators.required, Validators.min(0)]]
     });
+
+    this.changeForm.get('parcelNumber')?.valueChanges.subscribe(parcelNumber => {
+      if (parcelNumber > 0) {
+        // Aktive Uhr + letzter Stand + neue freie Uhren
+        this.http.get<any>(`https://backend.kgv.local:8443/api/water/switch-info?parcelNumber=${parcelNumber}`)
+          .subscribe({
+            next: (result) => {
+              this.activeMeterNumber = result.activeMeter || 'Kein Zähler';
+              this.oldReadingValue = result.oldReading != null ? result.oldReading.toFixed(2) : '—';
+              this.availableMeters = result.availableMeters || [];
+            },
+            error: () => {
+              this.activeMeterNumber = 'Fehler';
+              this.oldReadingValue = '—';
+              this.availableMeters = [];
+            }
+          });
+      } else {
+        this.activeMeterNumber = 'Kein Zähler';
+        this.oldReadingValue = '—';
+        this.availableMeters = [];
+      }
+    });
+
   }
 
   get parcelNumberControl(): FormControl {
@@ -106,14 +131,40 @@ export class WaterChangeComponent {
 
   submitChange() {
     if (this.changeForm.valid) {
-      console.log(this.changeForm.value);
-      this.snackBar.open('Zählerwechsel gespeichert!', 'OK', {
-        duration: 3000,
-        horizontalPosition: 'right',
-        verticalPosition: 'top'
-      });
+      const formValue = this.changeForm.value;
+
+      const payload = {
+        parcelNumber: formValue.parcelNumber,
+        wechselDatum: formValue.changeDate,
+        newWatermeterID: formValue.newMeterId,
+        readingValueNew: formValue.newReading
+      };
+
+      this.http.post('https://backend.kgv.local:8443/api/water/switch', payload)
+        .subscribe({
+          next: () => {
+            this.snackBar.open('Zählerwechsel erfolgreich durchgeführt!', 'OK', {
+              duration: 3000,
+              horizontalPosition: 'right',
+              verticalPosition: 'top'
+            });
+            this.changeForm.reset({ changeDate: new Date(), parcelNumber: 0 });
+            this.activeMeterNumber = '—';
+            this.oldReadingValue = '—';
+            this.availableMeters = [];
+          },
+          error: (err) => {
+            console.error(err);
+            this.snackBar.open('Fehler beim Speichern des Zählerwechsels!', 'OK', {
+              duration: 3000,
+              horizontalPosition: 'right',
+              verticalPosition: 'top'
+            });
+          }
+        });
     } else {
       this.changeForm.markAllAsTouched();
     }
   }
+
 }
