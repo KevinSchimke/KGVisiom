@@ -1,1 +1,105 @@
-<p>member works!</p>
+<div class="dashboard-container">
+    <!-- Actions Toolbar -->
+    <mat-toolbar class="actions-toolbar">
+        <span class="actions-spacer"></span>
+        <button mat-stroked-button color="accent" (click)="onAddMember()">
+            <mat-icon>person_add</mat-icon>
+            Neues Mitglied
+        </button>
+        <button mat-stroked-button disabled (click)="onDeleteSelected()">
+            <mat-icon>delete</mat-icon>
+            Löschen
+        </button>
+        <button mat-stroked-button [disabled]="!dataSource.filteredData.length" (click)="onCreateSerienbrief()">
+            <mat-icon>mail</mat-icon>
+            Serienbrief
+        </button>
+        <button mat-stroked-button [disabled]="!dataSource.filteredData.length" (click)="onExportExcel()">
+            <mat-icon>file_download</mat-icon>
+            Export Excel
+        </button>
+    </mat-toolbar>
+
+
+    <!-- Filter + Paginator -->
+    <div class="table-wrapper">
+
+        <div class="filter-controls-row">
+            <div class="filter-fields">
+                <mat-form-field appearance="outline">
+                    <mat-label>Filter-Spalte</mat-label>
+                    <mat-select [(ngModel)]="selectedColumn" (selectionChange)="applyFilter()">
+                        <mat-option *ngFor="let col of filterableColumns" [value]="col.value">
+                            {{ col.viewValue }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                    <mat-label>Filterwert</mat-label>
+                    <input matInput [(ngModel)]="filterValue" (ngModelChange)="applyFilter()" />
+                </mat-form-field>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:1rem;">
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Einträge pro Seite</mat-label>
+                    <mat-select [(ngModel)]="pageSize" (ngModelChange)="updatePageSize($event)">
+                        <mat-option *ngFor="let size of [5,10,25,50,100]" [value]="size">{{size}}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-paginator #paginator [length]="dataSource.filteredData.length" [pageSize]="pageSize"
+                    [pageSizeOptions]="[5,10,25,50,100]" showFirstLastButtons>
+                </mat-paginator>
+            </div>
+        </div>
+
+        <!-- Tabelle -->
+        <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
+
+            <!-- Select -->
+            <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef>
+                    <mat-checkbox [checked]="isAllSelected()" [indeterminate]="isSomeSelected()"
+                        (change)="masterToggle()">
+                    </mat-checkbox>
+                </th>
+                <td mat-cell *matCellDef="let row">
+                    <mat-checkbox (click)="$event.stopPropagation()" [checked]="selection.isSelected(row)"
+                        (change)="selection.toggle(row)">
+                    </mat-checkbox>
+                </td>
+            </ng-container>
+
+            <!-- Vorname -->
+            <ng-container matColumnDef="first_name">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Vorname</th>
+                <td mat-cell *matCellDef="let m">{{m.first_name}}</td>
+            </ng-container>
+
+            <!-- Nachname -->
+            <ng-container matColumnDef="last_name">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Nachname</th>
+                <td mat-cell *matCellDef="let m">{{m.last_name}}</td>
+            </ng-container>
+
+            <!-- Handy -->
+            <ng-container matColumnDef="kontakt">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Handy</th>
+                <td mat-cell *matCellDef="let m">{{m.kontakt}}</td>
+            </ng-container>
+
+            <!-- E-Mail -->
+            <ng-container matColumnDef="email">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>E-Mail</th>
+                <td mat-cell *matCellDef="let m">{{m.email}}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns" (click)="onRowClick(row)"
+                [class.row-selected]="selection.isSelected(row)">
+            </tr>
+
+        </table>
+    </div>
+</div>
