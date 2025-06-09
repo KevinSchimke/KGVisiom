@@ -16,6 +16,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { SelectionModel } from '@angular/cdk/collections';
+import { Router, RouterModule } from '@angular/router';
+
 
 @Component({
   selector: 'app-parcel',
@@ -23,6 +25,7 @@ import { SelectionModel } from '@angular/cdk/collections';
   imports: [
     CommonModule,
     FormsModule,
+    RouterModule,
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
@@ -37,30 +40,32 @@ import { SelectionModel } from '@angular/cdk/collections';
 })
 export class ParcelComponent implements AfterViewInit {
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
-  @ViewChild(MatSort,      { static: true }) sort!: MatSort;
+  @ViewChild(MatSort, { static: true }) sort!: MatSort;
 
-  dataSource     = new MatTableDataSource<any>([]);
-  selection      = new SelectionModel<any>(true, []);
-  selectedColumn = 'parcelID';
-  filterValue    = '';
-  pageSize       = 10;
+  dataSource = new MatTableDataSource<any>([]);
+  selection = new SelectionModel<any>(true, []);
+  selectedColumn = 'parcelNumber';
+  filterValue = '';
+  pageSize = 10;
 
-  sortActive: string       = 'parcelID';
-  sortDirection: 'asc'|'desc' = 'asc';
+  sortActive: string = 'parcelNumber';
+  sortDirection: 'asc' | 'desc' = 'asc';
 
   filterableColumns = [
     { value: 'statusLabel', viewValue: 'Status' },
-    { value: 'parcelID',    viewValue: 'Parzelle' },
-    { value: 'member',      viewValue: 'Mitglied' },
-    { value: 'area',        viewValue: 'Fläche (m²)' }
+    { value: 'parcelNumber', viewValue: 'Parzelle' },
+    { value: 'member', viewValue: 'Mitglied' },
+    { value: 'area', viewValue: 'Fläche (m²)' }
   ];
   displayedColumns: string[] = ['select', ...this.filterableColumns.map(c => c.value)];
 
   private http = inject(HttpClient);
+  private router = inject(Router);
+
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
-    this.dataSource.sort      = this.sort;
+    this.dataSource.sort = this.sort;
     this.loadData();
   }
 
