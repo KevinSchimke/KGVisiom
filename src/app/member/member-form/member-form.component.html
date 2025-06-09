@@ -1,1 +1,145 @@
-<p>member-form works!</p>
+<div class="form-container">
+  <form [formGroup]="memberForm" (ngSubmit)="onSubmit()" class="member-form">
+    <mat-accordion multi>
+      <!-- Mitgliedsdaten -->
+      <mat-expansion-panel [expanded]="true">
+        <mat-expansion-panel-header>
+          <mat-panel-title>Mitgliedsdaten</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="row">
+          <mat-form-field appearance="outline"><mat-label>Mitgliedstyp*</mat-label>
+            <mat-select formControlName="mitgliedstyp" required>
+              <mat-option *ngFor="let typ of mitgliedstypen" [value]="typ">{{ typ.typeName }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="row">
+                  <mat-form-field appearance="outline"><mat-label>Anrede</mat-label>
+            <mat-select formControlName="anrede">
+              <mat-option *ngFor="let a of anreden" [value]="a">{{ a.salutationName }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Titel</mat-label>
+            <mat-select formControlName="titel">
+              <mat-option *ngFor="let t of titel" [value]="t">{{ t.titleName }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="row">
+            
+          <mat-form-field appearance="outline"><mat-label>Vorname*</mat-label>
+            <input matInput formControlName="vorname" required>
+          </mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Nachname*</mat-label>
+            <input matInput formControlName="nachname" required>
+          </mat-form-field>
+
+        </div>
+        <div class="row">
+                      <mat-form-field appearance="outline"><mat-label>Geburtsname</mat-label>
+            <input matInput formControlName="geburtsname">
+          </mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Geburtsort</mat-label>
+            <input matInput formControlName="geburtsort">
+          </mat-form-field>
+
+        </div>
+        <div class="row">
+                      <mat-form-field appearance="outline"><mat-label>Geburtsdatum</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="geburtsdatum">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Nationalität</mat-label>
+            <input matInput formControlName="nationalitaet">
+          </mat-form-field>
+
+        </div>
+        <div class="row">
+                      <mat-form-field appearance="outline"><mat-label>Familienstand</mat-label>
+            <input matInput formControlName="familienstand">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width"><mat-label>Beruf</mat-label>
+            <input matInput formControlName="beruf">
+          </mat-form-field>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Adresse -->
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Adresse</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="row">
+          <mat-form-field appearance="outline"><mat-label>PLZ / Ort</mat-label>
+            <input matInput formControlName="plzort" [matAutocomplete]="autoOrt">
+            <mat-autocomplete #autoOrt="matAutocomplete" [displayWith]="displayOrt.bind(this)">
+              <mat-option *ngFor="let ort of filteredOrte$ | async" [value]="ort">
+                {{ ort.display }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Straße</mat-label>
+            <input matInput formControlName="strasse" [matAutocomplete]="autoStreet">
+            <mat-autocomplete #autoStreet="matAutocomplete" [displayWith]="displayStreet.bind(this)">
+              <mat-option *ngFor="let street of filteredStreets$ | async" [value]="street">
+                {{ street.street_name }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+        </div>
+        <div class="row">
+          <mat-form-field appearance="outline" class="full-width"><mat-label>Hausnummer</mat-label>
+            <input matInput formControlName="hausnummer">
+          </mat-form-field>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Kontaktinformationen -->
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Kontaktinformationen</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="row">
+          <mat-form-field appearance="outline"><mat-label>Telefon</mat-label>
+            <input matInput formControlName="telefon">
+          </mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Mobil</mat-label>
+            <input matInput formControlName="mobil">
+          </mat-form-field>
+        </div>
+        <div class="row">
+          <mat-form-field appearance="outline" class="full-width"><mat-label>E-Mail</mat-label>
+            <input matInput formControlName="email">
+          </mat-form-field>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Bankdaten -->
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Bankdaten</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="row">
+          <mat-form-field appearance="outline"><mat-label>Bankname</mat-label>
+            <input matInput formControlName="bankname">
+          </mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>IBAN</mat-label>
+            <input matInput formControlName="iban">
+          </mat-form-field>
+        </div>
+        <div class="row">
+          <mat-form-field appearance="outline"><mat-label>BIC</mat-label>
+            <input matInput formControlName="bic">
+          </mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Mandatsreferenz</mat-label>
+            <input matInput formControlName="mandatsreferenz">
+          </mat-form-field>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+    <div class="actions">
+      <button mat-flat-button color="primary" type="submit">Speichern</button>
+    </div>
+  </form>
+</div>

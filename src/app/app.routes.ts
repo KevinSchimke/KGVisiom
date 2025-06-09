@@ -10,6 +10,7 @@ import { SettingsComponent } from '../app/settings/settings.component';
 import { WaterSupplyComponent } from '../app/maintenance/water-supply/water-supply.component';
 import { PowerSupplyComponent } from '../app/maintenance/power-supply/power-supply.component';
 import { WasteDisposalComponent } from '../app/maintenance/waste-disposal/waste-disposal.component';
+import { MemberFormComponent } from './member/member-form/member-form.component';
 
 export const routes: Routes = [
   {
@@ -20,6 +21,12 @@ export const routes: Routes = [
   {
     path: 'personen',
     component: MemberComponent,
+    pathMatch: 'full',
+    data: { title: 'Mitglieder Übersicht' }
+  },
+  {
+    path: 'personen/neu',
+    component: MemberFormComponent,
     pathMatch: 'full',
     data: { title: 'Mitglieder Übersicht' }
   },

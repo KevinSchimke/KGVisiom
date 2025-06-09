@@ -1,0 +1,62 @@
+.form-container {
+    background: #1e1e1e;
+    padding: 1rem;
+    border-radius: 8px;
+    color: #fff;
+}
+
+h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    font-weight: bold;
+}
+
+.member-form {
+    width: 100%;
+
+    mat-accordion {
+        width: 100%;
+
+        mat-expansion-panel {
+            background: #1e1e1e;
+            color: #fff;
+            margin-bottom: 12px;
+
+            .mat-expansion-panel-header {
+                font-weight: bold;
+                font-size: 1.1rem;
+            }
+        }
+    }
+
+    .row {
+        display: flex;
+        gap: 18px;
+        margin-bottom: 12px;
+
+        mat-form-field {
+            flex: 1 1 0;
+            min-width: 180px;
+        }
+
+        .full-width {
+            flex: 2 1 0;
+            min-width: 360px;
+        }
+    }
+
+    .actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 24px;
+    }
+}
+
+button[type="submit"] {
+    min-width: 150px;
+    border-radius: 2rem;
+    background: #00e0ef;
+    color: #181b1b;
+    font-weight: 600;
+    font-size: 1rem;
+}

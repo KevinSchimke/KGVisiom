@@ -141,7 +141,7 @@ export class MemberComponent implements AfterViewInit {
   }
 
   onAddMember(): void {
-    this.router.navigate(['/personen', 'new']);
+    this.router.navigate(['/personen', 'neu']);
   }
 
   onDeleteSelected(): void {
